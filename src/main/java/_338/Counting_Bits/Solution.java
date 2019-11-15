@@ -1,0 +1,12 @@
+package _338.Counting_Bits;
+
+public class Solution {
+    public int[] countBits(int num) {
+        int[] result = new int[num + 1];
+        result[0] = 0; // 省略也行，默认初始化完就是0
+        for (int i = 1; i <= num; i++) {
+            result[i] = result[i & (i - 1)] + 1;
+        }
+        return result;
+    }
+}
