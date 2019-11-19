@@ -1,4 +1,4 @@
-package _121.best_time_to_buy_and_sell_stock;
+package _121.Best_Time_to_Buy_and_Sell_Stock;
 
 public class Solution {
     /**
