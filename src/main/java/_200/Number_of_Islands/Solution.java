@@ -1,11 +1,8 @@
 package _200.Number_of_Islands;
 
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-
 public class Solution {
-    Position[][] roots;
+    int[] roots;    // 存储并查集
+    int count = 0;  // 岛屿个数
 
     /**
      * 使用并查集
@@ -19,62 +16,53 @@ public class Solution {
         }
         int m = grid.length;
         int n = grid[0].length;
-        roots = new Position[m][n];
+        roots = new int[m * n];
+        // 初始化并查集
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
-                roots[i][j] = new Position(i, j);
+                // 并查集节点自己指向自己
+                roots[i * n + j] = i * n + j;
+                count ++;
             }
         }
-
-        Set<Position> set = new HashSet<>();
+        // 遍历所有的岛屿，合并岛屿
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
                 if (grid[i][j] == '0') {
+                    count --;
                     continue;
                 }
+                // 与左边的岛屿合并
                 if (i > 0 && grid[i - 1][j] == '1') {
-                    Position union = union(i - 1, j, i, j);
-                    set.remove(roots[i - 1][j]);
-                    set.remove(roots[i][j]);
-                    set.add(union);
+                    union((i - 1) * n + j, i * n + j);
                 }
+                // 与上面的岛屿合并
                 if (j > 0 && grid[i][j - 1] == '1') {
-                    Position union = union(i, j - 1, i, j);
-                    set.remove(roots[i][j - 1]);
-                    set.remove(roots[i][j]);
-                    set.add(union);
+                    union(i * n + (j - 1), i * n + j);
                 }
-                set.add(findRoot(i, j));
             }
         }
-        return set.size();
+        return count;
     }
 
     /**
      * 获取root
      *
-     * @param x
-     * @param y
+     * @param p
      * @return
      */
-    public Position findRoot(int x, int y) {
-        // 获取 position: x,y 的root
-        int i = x;
-        int j = y;
-        Position root = roots[i][j];
-        while (!root.rootIsCurPosition(i, j)) {
-            i = root.x;
-            j = root.y;
-            root = roots[i][j];
+    public int findRoot(int p) {
+        // 获取root
+        int root = p;
+        while (root != roots[root]) {
+            root = roots[root];
         }
         // 缩短路径，将路径上的所有节点的root全部赋为找到root
-        Position parent = roots[x][y];
-        while (!parent.rootIsCurPosition(x, y)) {
-            Position tmpPosition = roots[x][y]; // 暂存当前节点的上一个节点
-            roots[x][y] = root;
-            parent = tmpPosition;
-            x = parent.x;
-            y = parent.y;
+        int i = p;
+        while (i != roots[i]) {
+            int tmp = roots[i];
+            roots[i] = root;
+            i = tmp;
         }
         return root;
     }
@@ -82,46 +70,18 @@ public class Solution {
     /**
      * 合并
      *
-     * @param x1
-     * @param y1
-     * @param x2
-     * @param y2
+     * @param p1
+     * @param p2
      */
-    public Position union(int x1, int y1, int x2, int y2) {
-        Position root1 = findRoot(x1, y1);
-        Position root2 = findRoot(x2, y2);
-        roots[root2.x][root2.y] = root1;
-        return root1;
-    }
-
-    class Position {
-        int x;
-        int y;
-
-        public Position(int x, int y) {
-            this.x = x;
-            this.y = y;
-        }
-
-        public boolean rootIsCurPosition(int x, int y) {
-            return this.x == x && this.y == y;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Position position = (Position) o;
-            return x == position.x &&
-                    y == position.y;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(x, y);
+    public void union(int p1, int p2) {
+        int root1 = findRoot(p1);
+        int root2 = findRoot(p2);
+        if (root1 != root2) {
+            roots[root2] = root1;
+            // 两个岛屿合并，计数减1
+            count --;
         }
     }
-
     public static void main(String[] args) {
         char[][] grids = {{'1', '1', '1', '1', '0'}, {'1', '1', '0', '1', '0'}, {'1', '1', '0', '0', '0'}, {'0', '0', '0', '0', '0'}};
         int result = new Solution().numIslands(grids);
