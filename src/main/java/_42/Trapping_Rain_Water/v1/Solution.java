@@ -1,4 +1,4 @@
-package _42.Trapping_Rain_Water;
+package _42.Trapping_Rain_Water.v1;
 
 public class Solution {
     /**
